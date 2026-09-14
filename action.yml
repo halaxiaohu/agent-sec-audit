@@ -1,0 +1,52 @@
+name: "Agent Security Audit (MCP & Coding Agents)"
+description: "Scan AGENTS.md, SKILL.md, MCP server configurations, and LLM tool code for prompt injection, sandbox bypass, and RCE risks."
+author: "AgentSec Contributors"
+branding:
+  icon: "shield"
+  color: "red"
+
+inputs:
+  target:
+    description: "Directory or file path to scan"
+    required: false
+    default: "."
+  fail-on:
+    description: "Minimum severity level that causes a non-zero exit code (LOW, MEDIUM, HIGH, CRITICAL, NONE)"
+    required: false
+    default: "HIGH"
+  format:
+    description: "Output report format (text, json, sarif)"
+    required: false
+    default: "text"
+  output:
+    description: "Optional output file path (e.g., results.sarif)"
+    required: false
+    default: ""
+  llm-audit:
+    description: "Enable semantic triage and auto-remediation suggestions via OpenAI API (true/false)"
+    required: false
+    default: "false"
+
+runs:
+  using: "composite"
+  steps:
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.12"
+
+    - name: Install agent-sec-audit
+      shell: bash
+      run: pip install "${{ github.action_path }}"
+
+    - name: Run Security Scan
+      shell: bash
+      run: |
+        CMD="agent-sec-audit scan ${{ inputs.target }} --fail-on ${{ inputs.fail-on }} --format ${{ inputs.format }}"
+        if [ -n "${{ inputs.output }}" ]; then
+          CMD="$CMD --output ${{ inputs.output }}"
+        fi
+        if [ "${{ inputs.llm-audit }}" = "true" ]; then
+          CMD="$CMD --llm-audit"
+        fi
+        eval "$CMD"

@@ -1,0 +1,6 @@
+- id: agent-sec-audit
+  name: Agent & MCP Security Audit
+  description: Scan MCP configs, AGENTS.md, SKILL.md, and LLM tool code for security vulnerabilities.
+  entry: agent-sec-audit scan
+  language: python
+  pass_filenames: false
